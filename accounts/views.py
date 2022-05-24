@@ -1,10 +1,27 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages, auth
+from django.views.generic import (UpdateView, TemplateView)
+from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import ugettext_lazy as _
+from django.core.mail import send_mail, BadHeaderError
+from django.http import HttpResponse
+from django.contrib.auth.forms import PasswordResetForm
+# from django.contrib.auth.models import User
+from django.template.loader import render_to_string
+from django.db.models.query_utils import Q
+from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+
+from .forms import ProfileUpdateForm
+from .models import CustomUser
+from contacts.models import Contact
+
 from django.contrib.auth import get_user_model
 
 
 User = get_user_model()
+
 
 def register(request):
     """Register new user function"""
@@ -75,5 +92,27 @@ def logout(request):
         messages.success(request, _("You are now logged out"))
         return redirect('index')
 
+
+
+
+class ProfileUpdateView(SuccessMessageMixin, UpdateView):
+    model = CustomUser
+    form_class = ProfileUpdateForm
+    template_name = 'accounts/profile.html'
+    success_message = _("Profile updated successfully!")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # request.path replacement
+        context['profile'] = True
+        # Showcase Section Infos
+        context['title'] = _("Manage Account")
+        context['subtitle'] = _("Manage your Real-Estate account")
+        # SEO
+        context['page_title'] = _("Impressum")
+        context['page_description'] = _("Real estate manager."
+                                        "This is our impressum page.")
+
+        return context
 
 
