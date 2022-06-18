@@ -116,3 +116,14 @@ class ProfileUpdateView(SuccessMessageMixin, UpdateView):
         return context
 
 
+
+
+# TODO convert to class based view
+def dashboard(request):
+    user_contacts = Contact.objects.order_by('-contact_date').filter(
+        user_id=request.user.id)
+
+    context = {
+        'contacts': user_contacts
+    }
+    return render(request, 'accounts/dashboard.html', context)
